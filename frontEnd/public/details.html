@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SP Games</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body style="background-image:url('./images/background_img.png');">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+        <a class="navbar-brand" href="#"><img src="./images/sp_games.png" class="img-fluid" style="width: 2.6rem"></a>
+
+        <div class="collapse navbar-collapse justify-content-left" id="navbarSupportedContent">
+            <ul class="navbar-nav">
+                <li class="nav-item active"> <a class="nav-link" href="#">HOME <span
+                            class="sr-only">(current)</span></a> </li>
+                <li class="nav-item"> <a class="nav-link" href="#">GAMES</a> </li>
+                <li class="nav-item dropdown"> <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                        role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Dropdown
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown"> <a class="dropdown-item"
+                            href="#">Action</a> <a class="dropdown-item" href="#">Another action</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                </li>
+                <li class="nav-item"> <a class="nav-link disabled" href="#" tabindex="-1"
+                        aria-disabled="true">Disabled</a> </li>
+                <li class="nav-item" id="logout" style="display: none;"><a class="nav-link" href="#" tabindex="-1"
+                        aria-disabled="true">Logout</a></li>
+            </ul>
+        </div>
+    </nav><!-- nav-bar -->
+
+    <!-- Main Body -->
+    <div class="container mt-3">
+        <div style="margin-left: 20%; margin-right: 5%;">
+
+            <h2 class="text-danger" id="title"></h2>
+            <div class="mb-3 border-bottom border-success">
+                <p id="averageRating"></p>
+            </div>
+
+            <div class="w-25 mb-3">
+                <img src="*" class="img-fluid" id="image">
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-danger font-weight-bold">Price:</h4>
+                <h5 class="font-weight-bold" id="price"></h5>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-danger font-weight-bold">Platform:</h4>
+                <h5 class="font-weight-bold" id="platform"></h5>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-danger font-weight-bold">Category:</h4>
+                <h5 class="font-weight-bold" id="category">s</h5>
+            </div>
+
+            <div class="mb-4">
+                <h4 class="text-danger font-weight-bold">Published Year:</h4>
+                <h5 class="font-weight-bold" id="year"></h5>
+            </div>
+
+            <div class="mb-5">
+                <h4 class="text-danger font-weight-bold">Description:</h4>
+                <h5 class="font-weight-bold" id="description"></h5>
+            </div>
+
+            <div class="">
+                <h3 class="text-info">Leave a comment:</h3>
+            </div>
+
+            <form action="">
+                <div class="form-group">
+                    <label for="selectRating" class="font-weight-bold">Rating:</label>
+                    <select class="form-control" id="selectRating">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="commentField" class="font-weight-bold">Comment:</label>
+                    <textarea class="form-control mb-2" id="commentField" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success mr-2" id="submit">Submit</button>
+                <button type="reset" class="btn btn-danger">Reset</button>
+            </form>
+
+            <div class="mt-4 border-bottom border-secondary">
+                <h3 class="text-muted">Comments</h3>
+            </div>
+
+            <ul class="list-unstyled mt-3" id="comments"></ul>
+
+        </div><!-- inner-container -->
+    </div><!-- outer-container -->
+
+    <!-- Modal for login page -->
+    <div class="modal fade" id="staticBackdrop" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header align-items-center">
+                    <img class="mb-2 img-fluid" src="./images/sp_games_round.png" alt="sp_games" width="44" height="44">
+                    <h1 class="h4 mb-2 pl-2 font-weight-normal">Welcome to SP Games</h1>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div><!-- modal-header -->
+                <form>
+                    <div class="modal-body">
+                        <div class="text-left">
+                            <h4>Please Login in</h4>
+                            <label for="inputName">Username</label>
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text"><img src="./images/user.png" width="15"></div>
+                                </div>
+                                <input type="text" id="inputName" class="form-control" required autofocus>
+                            </div>
+                        </div>
+                        <div class="text-left pt-3">
+                            <label for="inputPassword">Password</label>
+
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text"><img src="./images/password.png" width="15"></div>
+                                </div>
+                                <input type="password" id="inputPassword" class="form-control" required>
+                            </div>
+                        </div><!-- password -->
+                    </div><!-- modal-body -->
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary" id="reset-login">Clear</button>
+                        <button type="submit" class="btn btn-primary">Sign in</button>
+                    </div><!-- modal-footer -->
+                </form>
+            </div><!-- modal-content -->
+        </div><!-- modal-dialog -->
+    </div><!-- modal -->
+</body>
+
+<!-- Login Modal  -->
+<script>
+    /* Show login modal once the whole page is loaded */
+    $(document).ready(function () {
+        let value = 'hidden';
+        setModal(value);
+    });
+
+    const setModal = function (value) {
+        $('#staticBackdrop').modal(value);
+    }
+
+</script>
+
+<script>
+    const baseUrl = "http://localhost:3001";
+    var gameid = window.localStorage.getItem('gameid').toString();
+    //window.localStorage.removeItem('gameid');
+
+    axios.get(`${baseUrl}/game/${gameid}`)
+        .then((res) => {
+            var game = res.data;
+            var categories = "";
+
+            for (let i = 0; i < res.data.categories.length; i++) {
+                let comma = " , ";
+                if (res.data.categories.length - 1 == i) {
+                    comma = "";
+                }
+                categories += res.data.categories[i].catname + comma;
+            }
+
+            if (categories == "") categories = "N/A";
+
+            $("#title").text(game.title);
+            $("#platform").text(game.platform);
+            $("#price").text("$" + game.price);
+            $("#year").text(game.year);
+            $("#description").text(game.description);
+            $("#category").text(categories);
+            $("#image").attr("src", `./images/${game.image}`);
+        }).catch((err) => {
+            console.log(err);
+        });
+
+    axios.get(`${baseUrl}/game/${gameid}/review`)
+        .then((res) => {
+            var reviews = res.data;
+            var totalRating = 0;
+
+            var comments = "";
+            reviews.forEach(ele => {
+                comments += ` 
+                            <li class="media mb - 3">
+                                <img src = "./images/user.jpg" class="mr-3 img-fluid" style = "width: 7%;">
+                                    <div class="media-body">
+                                        <h5 class="mt-0 mb-1">${ele.username}</h5>
+                                        <p class="font-italic mb-1 text-danger">Posted on: ${ele.created_at} , Rating Given: ${ele.rating} </p>
+                                        <p>
+                                            ${ele.content}
+                                       </p>
+                                    </div>
+                            </li >`;
+                totalRating += ele.rating * 1;
+            });
+
+            $("#comments").append(comments);
+            $("#averageRating").append(`Average rating of
+                    ${totalRating / reviews.length} from ${reviews.length} comments(s)`);
+
+        }).catch((err) => {
+            console.log(err);
+        });
+</script>
+
+</html>

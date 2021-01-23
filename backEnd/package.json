@@ -1,0 +1,24 @@
+{
+  "name": "bed_assignment",
+  "version": "1.0.0",
+  "description": "CA1 for BED",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mysql",
+    "express",
+    "router"
+  ],
+  "author": "Wu Zengfu (zengfu20.@ichat.sp.edu.sg)",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "local-storage": "^2.0.0",
+    "mysql": "^2.18.1"
+  }
+}

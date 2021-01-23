@@ -1,0 +1,396 @@
+/*
+  Name: Wu Zengfu
+  Admission Number: 2033457
+  Class: DIT/04
+*/
+var express = require('express');
+var router = express();
+
+var userDB = require('../model/userDB');
+var catDB = require('../model/categoryDB');
+var gameDB = require('../model/gameDB');
+var reviewDB = require('../model/reviewDB');
+
+const jwt = require("jsonwebtoken");
+const JWT_SECRET = require("../config.js");
+const verifyToken = require("../auth/verifyToken");
+var cors = require('cors');
+
+router.options('*', cors());
+router.use(cors());
+router.use(express.urlencoded({ extended: false }));
+
+//0
+router.post("/login/", (req, res) => {
+    userDB.verify(
+        req.body.username,
+        req.body.password,
+        (error, user) => {
+            if (error) {
+                res.status(500).send();
+                return;
+            }
+            if (user === null) {
+                res.status(401).send();
+                return;
+            }
+            const payload = { user_id: user.userid, user_type: user.type };
+            jwt.sign(payload, JWT_SECRET, { algorithm: "HS256" }, (error, token) => {
+                if (error) {
+                    console.log(error);
+                    res.status(401).send();
+                    return;
+                }
+                res.status(200).send({
+                    token: token,
+                    user_id: user.userid
+                });
+            })
+        });
+});
+
+//1
+router.get("/users", (req, res) => {
+    userDB.getUsers((err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            res.status(200).json(result);
+        }
+    })
+});
+
+//2
+router.post("/users", (req, res) => {
+    var { username, email, type, profile_pic_url } = req.body;
+
+    userDB.postUser(username, email, type, profile_pic_url, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            if (result === -1) {
+                res.status(422).json("The username,email or profile_pic_url has already existed!")
+            } else {
+                res.status(201).json({ "userid": result.insertId });
+            }
+        }
+    });
+});
+
+//3
+router.get("/users/:id/", (req, res) => {
+    var id = req.params.id;
+
+    if (isNaN(parseInt(id))) {
+        res.status(422).json({ message: "Id '" + id + "' is not a number!" });
+    } else {
+        userDB.getUser(id, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
+            } else {
+                console.log(result);
+                if (result === -1) {
+                    res.status(422).json("Cannot find the record!");
+                } else {
+                    res.status(200).json(result);
+                }
+            }
+        })
+    }
+});
+
+//4
+router.post("/category", (req, res) => {
+    var { catname, description } = req.body;
+
+    catDB.postCategory(catname, description, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            if (result === -1) {
+                res.status(422).json("The category name provided already exists.");
+            } else {
+                res.status(204).json();
+            }
+        }
+    });
+});
+
+//5
+router.put("/category/:id/", verifyToken, (req, res) => {
+    var { catname, description } = req.body;
+    var id = req.params.id;
+
+    if (isNaN(id)) {
+        res.status(422).json("Category id '" + id + "' is not a number!");
+    } else {
+        catDB.updateCategory(catname, description, id, (err, result) => {
+            if (err) {
+                console.log(err);
+                if (result === -1) {
+                    res.status(422).json(err);
+                } else {
+                    res.status(500).json(err);
+                }
+            } else {
+                console.log(result);
+                res.status(204).json();
+            }
+        });
+    }
+});
+
+//6
+router.post("/game", (req, res) => {
+    var { title, description, price, platform, categoryid, year } = req.body;
+
+    gameDB.postGame(title, description, price, platform, categoryid, year, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json(err);
+        } else {
+            console.log(result);
+            res.status(201).json({ "gameid": result });
+        }
+    });
+});
+
+//7
+router.get("/games/:platform", (req, res) => {
+    var platform = req.params.platform;
+
+    gameDB.getGamesByPlatform(platform, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json(err);
+        } else {
+            console.log(result);
+            if (result === -1) {
+                res.status(422).json("Cannot find the platform of " + platform + " !");
+            } else {
+                res.status(200).json(result);
+            }
+        }
+    });
+});
+
+//8
+router.delete("/game/:id", (req, res) => {
+    var id = req.params.id;
+
+    if (isNaN(id)) {
+        res.status(422).json("ID '" + id + "' is not a number!");
+    } else {
+        gameDB.deleteGame(id, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
+            } else {
+                console.log(result);
+                if (result === -1) {
+                    res.status(422).json("Cannot find the id of " + id + " !");
+                } else {
+                    res.status(204).json();
+                }
+            }
+        });
+    }
+});
+
+//9
+router.put("/game/:id", (req, res) => {
+    var id = req.params.id;
+    var { title, description, price, platform, categoryid, year } = req.body;
+
+    console.log(title);
+    if (isNaN(id)) {
+        res.status(422).json("ID '" + id + "' is not a number!");
+    } else {
+        gameDB.updateGame(title, description, price, platform, categoryid, year, id, (err, result) => {
+            if (err) {
+                if (result === -1) {
+                    res.status(422).json(err);
+                } else {
+                    res.status(500).json(err);
+                }
+            } else {
+                res.status(204).json();
+            }
+        });
+    }
+});
+
+//10
+router.post("/user/:uid/game/:gid/review/", (req, res) => {
+    var uid = req.params.uid;
+    var gid = req.params.gid;
+
+    var { content, rating } = req.body;
+
+    if (isNaN(uid) || isNaN(gid)) {
+        res.status(422).json("userId or gameId is not a number!");
+    } else {
+        reviewDB.postReview(uid, gid, content, rating, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
+            } else {
+                console.log(result);
+                if (result === -1) {
+                    res.status(422).json("GameId '" + gid + "' does not exist!");
+                } else if (result === -2) {
+                    res.status(422).json("UserId '" + uid + "' does not exist!");
+                } else {
+                    res.status(201).type('json').json({ "reviewid": result.insertId });
+                }
+            }
+        });
+    }
+});
+
+//11
+router.get("/game/:id/review", (req, res) => {
+    var gid = req.params.id;
+
+    if (isNaN(gid)) {
+        res.status(422).json("GameId '" + gid + "' is not a number!");
+    } else {
+        reviewDB.getReviews(gid, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
+            } else {
+                console.log(result);
+                if (result === -1) {
+                    res.status(422).json("GameId '" + gid + "' does not exist!");
+                } else if (result === -2) {
+                    res.status(422).json("GameId '" + gid + "' does not have a review!");
+                } else {
+                    res.status(200).json(result);
+                }
+            }
+        });
+    }
+});
+
+//12
+router.delete("/review/:id", (req, res) => {
+    var reviewId = req.params.id;
+
+    if (isNaN(reviewId)) {
+        res.status(422).json(reviewId + " is not a number!");
+    } else {
+        reviewDB.deleteReview(reviewId, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
+            } else {
+                console.log(result);
+                if (result === 0) {
+                    res.status(422).json("Cannot find the review with id " + reviewId + " !");
+                } else {
+                    res.status(200).json({ "AffectedRows": result });
+                }
+            }
+        });
+    }
+});
+
+//13
+router.delete("/game/:gameid/category/:catid", (req, res) => {
+    var gameid = req.params.gameid;
+    var catid = req.params.catid;
+
+    if (isNaN(gameid) || isNaN(catid)) {
+        res.status(422).json("GameId or CategoryId is not a number!");
+    } else {
+        catDB.deleteGameCategory(gameid, catid, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json(err);
+            } else {
+                console.log(result);
+                if (result.affectedRows === 0) {
+                    res.status(422).json("The the game with id 14 does not contain the category with cat id " + catid + " !");
+                } else {
+                    res.status(200).json({ "AffectedRows": result.affectedRows });
+                }
+            }
+        });
+    }
+});
+
+//14
+router.put("/game/:gameid/image", (req, res) => {
+    var gid = req.params.gameid;
+    var { url } = req.body;
+
+    if (isNaN(gid)) {
+        res.status(422).json("GameId '" + gid + "' is not a number!");
+    } else {
+        gameDB.uploadImage(gid, url, (err, result) => {
+            if (err) {
+                if (result) {
+                    res.status(422).json(result);
+                } else {
+                    console.log(err);
+                    res.status(500).json("Unknown error");
+                }
+            } else {
+                res.status(200).json({ "AffectedRows": result.affectedRows });
+            }
+        });
+    }
+});
+
+//15
+router.get("/gamesWithImage", (req, res) => {
+
+    gameDB.getAllgamesWithimage((err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            res.status(200).json(result);
+        }
+    });
+});
+
+//16
+router.get("/platforms", (req, res) => {
+    gameDB.getAllPlatforms((err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            res.status(200).json(result)
+        }
+    });
+});
+
+//17 Get game by id
+router.get("/game/:gameid", (req, res) => {
+    var gameid = req.params.gameid;
+    gameDB.getGameById(gameid, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).json("Unknown error");
+        } else {
+            console.log(result);
+            res.status(200).json(result);
+        }
+    });
+});
+
+
+
+module.exports = router;
