@@ -7,7 +7,7 @@ var db = require('./databaseConfig.js');
 
 var userDB = {
     //0
-    verify: function (username, password, callback) {
+    verify: function (email, password, callback) {
 
         var dbConn = db.getConnection();
         dbConn.connect(function (err) {
@@ -18,9 +18,9 @@ var userDB = {
                 return callback(err, null);
             } else {
 
-                const query = "SELECT * FROM user WHERE username=? and password=?";
+                const query = "SELECT * FROM user WHERE email=? and password=?";
 
-                dbConn.query(query, [username, password], (error, results) => {
+                dbConn.query(query, [email, password], (error, results) => {
                     if (error) {
                         callback(error, null);
                         return;
@@ -29,8 +29,7 @@ var userDB = {
                         return callback(null, null);
 
                     } else {
-                        const user = results[0];
-                        return callback(null, user);
+                        return callback(null, results[0]);
                     }
                 });
             }

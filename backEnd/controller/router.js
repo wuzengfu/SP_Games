@@ -10,7 +10,6 @@ var userDB = require('../model/userDB');
 var catDB = require('../model/categoryDB');
 var gameDB = require('../model/gameDB');
 var reviewDB = require('../model/reviewDB');
-
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config.js");
 const verifyToken = require("../auth/verifyToken");
@@ -18,14 +17,24 @@ var cors = require('cors');
 
 router.options('*', cors());
 router.use(cors());
+
 router.use(express.urlencoded({ extended: false }));
+router.use(express.json());
 
 //0
-router.post("/login/", (req, res) => {
+router.post("/login/", function (req, res) {
+    console.log('----------------------------');
+    var { email, password } = req.body;
+    console.log(req.body);
+    console.log(email);
+    console.log(password);
+
+
     userDB.verify(
-        req.body.username,
+        req.body.email,
         req.body.password,
         (error, user) => {
+
             if (error) {
                 res.status(500).send();
                 return;
@@ -40,11 +49,15 @@ router.post("/login/", (req, res) => {
                     console.log(error);
                     res.status(401).send();
                     return;
+                } else {
+                    console.log(token);
+                    res.status(200).send({
+                        token: token,
+                        user_id: user.userid,
+                        user_type: user.type,
+                        user_name: user.username
+                    });
                 }
-                res.status(200).send({
-                    token: token,
-                    user_id: user.userid
-                });
             })
         });
 });

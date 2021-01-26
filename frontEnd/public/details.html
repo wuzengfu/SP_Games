@@ -159,24 +159,14 @@
     </div><!-- modal -->
 </body>
 
-<!-- Login Modal  -->
+<!-- BaseUrl -->
 <script>
-    /* Show login modal once the whole page is loaded */
-    $(document).ready(function () {
-        let value = 'hidden';
-        setModal(value);
-    });
-
-    const setModal = function (value) {
-        $('#staticBackdrop').modal(value);
-    }
-
+    const baseUrl = "http://172.22.73.58:3001";
 </script>
 
 <script>
-    const baseUrl = "http://localhost:3001";
     var gameid = window.localStorage.getItem('gameid').toString();
-    //window.localStorage.removeItem('gameid');
+    window.localStorage.removeItem('gameid');
 
     axios.get(`${baseUrl}/game/${gameid}`)
         .then((res) => {
