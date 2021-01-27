@@ -241,14 +241,16 @@ router.put("/game/:id", (req, res) => {
 });
 
 //10
-router.post("/user/:uid/game/:gid/review/", (req, res) => {
-    var uid = req.params.uid;
-    var gid = req.params.gid;
+router.post("/user/:uid/game/:gid/review/", verifyToken, (req, res) => {
+    var uid = req.params.uid * 1;
+    var gid = req.params.gid * 1;
 
-    var { content, rating } = req.body;
+    var { content, rating, type } = req.body;
 
     if (isNaN(uid) || isNaN(gid)) {
         res.status(422).json("userId or gameId is not a number!");
+    } else if (type != "Customer") {
+        res.status(422).json("Must be a customer!");
     } else {
         reviewDB.postReview(uid, gid, content, rating, (err, result) => {
             if (err) {

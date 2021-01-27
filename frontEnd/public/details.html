@@ -96,10 +96,10 @@
                 <h3 class="text-info">Leave a comment:</h3>
             </div>
 
-            <form action="">
+            <form action="" id="create-post-form">
                 <div class="form-group">
                     <label for="selectRating" class="font-weight-bold">Rating:</label>
-                    <select class="form-control" id="selectRating">
+                    <select class="form-control" id="rating">
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -110,7 +110,7 @@
                 </div>
                 <div class="form-group">
                     <label for="commentField" class="font-weight-bold">Comment:</label>
-                    <textarea class="form-control mb-2" id="commentField" rows="5" required></textarea>
+                    <textarea class="form-control mb-2" id="comment" rows="5" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-success mr-2" id="submit">Submit</button>
                 <button type="reset" class="btn btn-danger">Reset</button>
@@ -194,44 +194,46 @@
 
 <script src="./js/loginAndLogout.js"></script>
 
+<!-- Initialize game details and reviews -->
 <script>
     var gameid = window.localStorage.getItem('gameid').toString();
     //window.localStorage.removeItem('gameid');
+    const getGameDetails = () => {
+        axios.get(`${baseUrl}/game/${gameid}`)
+            .then((res) => {
+                var game = res.data;
+                var categories = "";
 
-    axios.get(`${baseUrl}/game/${gameid}`)
-        .then((res) => {
-            var game = res.data;
-            var categories = "";
-
-            for (let i = 0; i < res.data.categories.length; i++) {
-                let comma = " , ";
-                if (res.data.categories.length - 1 == i) {
-                    comma = "";
+                for (let i = 0; i < res.data.categories.length; i++) {
+                    let comma = " , ";
+                    if (res.data.categories.length - 1 == i) {
+                        comma = "";
+                    }
+                    categories += res.data.categories[i].catname + comma;
                 }
-                categories += res.data.categories[i].catname + comma;
-            }
 
-            if (categories == "") categories = "N/A";
+                if (categories == "") categories = "N/A";
 
-            $("#title").text(game.title);
-            $("#platform").text(game.platform);
-            $("#price").text("$" + game.price);
-            $("#year").text(game.year);
-            $("#description").text(game.description);
-            $("#category").text(categories);
-            $("#image").attr("src", `./images/${game.image}`);
-        }).catch((err) => {
-            console.log(err);
-        });
+                $("#title").text(game.title);
+                $("#platform").text(game.platform);
+                $("#price").text("$" + game.price);
+                $("#year").text(game.year);
+                $("#description").text(game.description);
+                $("#category").text(categories);
+                $("#image").attr("src", `./images/${game.image}`);
+            }).catch((err) => {
+                console.log(err);
+            });
 
-    axios.get(`${baseUrl}/game/${gameid}/review`)
-        .then((res) => {
-            var reviews = res.data;
-            var totalRating = 0;
 
-            var comments = "";
-            reviews.forEach(ele => {
-                comments += ` 
+        axios.get(`${baseUrl}/game/${gameid}/review`)
+            .then((res) => {
+                var reviews = res.data;
+                var totalRating = 0;
+
+                var comments = "";
+                reviews.forEach(ele => {
+                    comments += ` 
                             <li class="media mb - 3">
                                 <img src = "./images/user.jpg" class="mr-3 img-fluid" style = "width: 7%;">
                                     <div class="media-body">
@@ -242,16 +244,53 @@
                                        </p>
                                     </div>
                             </li >`;
-                totalRating += ele.rating * 1;
+                    totalRating += ele.rating * 1;
+                });
+
+                $("#comments").html(comments);
+                $("#averageRating").html(`Average rating of
+                    ${(totalRating / reviews.length).toFixed(2)} from ${reviews.length} comments(s)`);
+
+            }).catch((err) => {
+                console.log(err);
             });
+    }
+    getGameDetails();
+</script>
 
-            $("#comments").append(comments);
-            $("#averageRating").append(`Average rating of
-                    ${totalRating / reviews.length} from ${reviews.length} comments(s)`);
+<!-- Create Post -->
+<script>
+    $("#create-post-form").submit((event) => {
+        // prevents the page from refreshing
+        event.preventDefault();
 
-        }).catch((err) => {
-            console.log(err);
-        });
+        if (window.localStorage.getItem('userid') == null) {
+            alert('Only registered members can add a review!');
+            $('#loginModal').modal('show');
+        } else {
+            const uid = window.localStorage.getItem('userid');
+            const gid = window.localStorage.getItem('gameid');
+            const requestBody = {
+                content: $("#comment").val(),
+                rating: $('#rating').val(),
+                type: window.localStorage.getItem('userType')
+            };
+            const header = `Bearer ${window.localStorage.getItem('token')}`;
+
+            axios.post(`${baseUrl}/user/${uid}/game/${gid}/review/`, requestBody, {
+                headers: {
+                    Authorization: header
+                }
+            })
+                .then((response) => {
+                    $("#create-post-form").trigger('reset');
+                    getGameDetails();
+                }).catch(err => {
+                    console.log(err);
+                    alert("Only Customer can add a review!");
+                });
+        }
+    });
 </script>
 
 </html>

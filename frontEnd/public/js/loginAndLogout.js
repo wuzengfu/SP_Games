@@ -14,8 +14,8 @@ $(document).ready(function () {
 });
 
 /* Verify Login */
-$('#loginButton').click(() => verfiyLogin());
-const verfiyLogin = () => {
+$('#loginForm').submit((eve) => {
+    eve.preventDefault();
     var email = $('#email').val();
     var password = $('#password').val();
     const requestBody = {
@@ -45,7 +45,7 @@ const verfiyLogin = () => {
             alert("Please enter the correct password or email!");
             console.log(err);
         });
-}
+});
 
 /* Logout */
 $("#logout").click(() => {

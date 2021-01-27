@@ -87,6 +87,7 @@ var reviewDB = {
                                             result[i].gameid = JSON.stringify(result[i].gameid);
                                             result[i].rating = JSON.stringify(result[i].rating);
                                         }
+                                        result.reverse();
                                         return callback(null, result);
                                     }
                                 }
