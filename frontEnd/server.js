@@ -1,6 +1,6 @@
 const express = require('express');
 
-var hostname = "0.0.0.0";
+var hostname = "localhost";
 var port = 3000;
 
 var app = express();

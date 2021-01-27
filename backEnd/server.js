@@ -4,7 +4,7 @@
   Class: DIT/04
 */
 const router = require('./controller/router.js');
-const hostname = '0.0.0.0';
+const hostname = 'localhost';
 const port = 3001;
 
 const server = router.listen(port, function () {

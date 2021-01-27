@@ -40,9 +40,9 @@
 
         <div class="collapse navbar-collapse justify-content-left">
             <ul class="navbar-nav">
-                <li class="nav-item active"> <a class="nav-link" href="#">HOME <span
+                <li class="nav-item active"> <a class="nav-link" href="./index.html">HOME <span
                             class="sr-only">(current)</span></a> </li>
-                <li class="nav-item"> <a class="nav-link" href="#">GAMES</a> </li>
+                <li class="nav-item"> <a class="nav-link" href="./details.html">GAMES</a> </li>
                 <li class="nav-item"> <a class="nav-link" href="#" id="loginBar">LOGIN</a> </li>
                 <li class="nav-item dropdown" id="logoutDropdown" style="margin-left:300%;">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
@@ -127,6 +127,7 @@
                     <div class="modal-body">
                         <div class="text-left">
                             <h4>Please Login in</h4>
+                            <p class="text-danger" id="loginFailed">Please enter a correct password or email!</p>
                             <label for="inputName">Email</label>
                             <div class="input-group mb-2">
                                 <div class="input-group-prepend">
@@ -177,83 +178,10 @@
 
 <!-- BaseUrl -->
 <script>
-    const baseUrl = "http://172.22.73.58:3001";
+    const baseUrl = "http://localhost:3001";
 </script>
 
-<!--  Initialize Navigation Bar  -->
-<script>
-    $(document).ready(function () {
-        let value = window.localStorage.getItem('userid');
-        if (value != null || value != undefined) {
-            $('#loginDropdown').hide();
-            $('#loginBar').hide();
-            $('#logoutDropdown').show();
-            $('#loginName').text(window.localStorage.getItem('username'));
-            $('#loginModal').modal('hide');
-        } else {
-            $('#logoutDropdown').hide();
-            $('#loginModal').modal('show');
-        }
-    });
-</script>
-
-<!-- Login Verify -->
-<script>
-    $('#loginButton').click(function () {
-        var email = $('#email').val();
-        var password = $('#password').val();
-        const requestBody = {
-            email: $("#email").val(),
-            password: $("#password").val()
-        };
-        axios.post(`${baseUrl}/login/`, requestBody).
-            then((res) => {
-                if (res != null) {
-                    localStorage.setItem('token', res.data.token);
-                    localStorage.setItem('userid', res.data.user_id);
-                    localStorage.setItem('userType', res.data.user_type);
-                    //localStorage.setItem('modal', 'hide');
-                    localStorage.setItem('username', res.data.user_name);
-                    $('#loginName').text(res.data.user_name);
-                    alert('Hello! ' + res.data.user_name);
-                    $('#loginModal').modal('hide');
-                    $('#logoutDropdown').show();
-                    $('#loginDropdown').hide();
-                    $('#loginBar').hide();
-                } else {
-                    console.log("Error");
-                }
-            }).catch((err) => {
-                console.log(err);
-            });
-    });
-</script>
-
-<!-- Logout -->
-<script>
-    $("#logout").click(() => {
-        $('#logoutModal').modal('show');
-        $('#logoutHeader').text('Hi, ' + $('#loginName').text());
-    });
-    $('#logoutConfirm').click(() => {
-        window.localStorage.removeItem('userid');
-        window.localStorage.removeItem('token');
-        window.localStorage.removeItem('userType');
-        window.localStorage.removeItem('username');
-        //window.localStorage.setItem('modal', 'show');
-        alert("You have logged out successfully!");
-        $('#logoutModal').modal('hide');
-        $('#logoutDropdown').hide();
-        $('#loginBar').show();
-    });
-</script>
-
-<!-- Show Login Modal when Login Tab is pressed -->
-<script>
-    $('#loginBar').click(() => {
-        $('#loginModal').modal('show');
-    })
-</script>
+<script src="./js/loginAndLogout.js"></script>
 
 <!-- Initialize all game results and platforms -->
 <script>
@@ -369,7 +297,7 @@
 <script>
     function goToDetails(gameid) {
         window.localStorage.setItem('gameid', gameid);
-        window.open("./details.html", '_blank');
+        window.location.assign('./details.html');
     }
 </script>
 
