@@ -181,18 +181,22 @@ router.put("/category/:id/", verifyToken, (req, res) => {
 });
 
 //6
-router.post("/game", (req, res) => {
-    var { title, description, price, platform, categoryid, year } = req.body;
+router.post("/game", verifyToken, (req, res) => {
+    var { title, description, price, platform, categoryid, year, userType } = req.body;
 
-    gameDB.postGame(title, description, price, platform, categoryid, year, (err, result) => {
-        if (err) {
-            console.log(err);
-            res.status(500).json(err);
-        } else {
-            console.log(result);
-            res.status(201).json({ "gameid": result });
-        }
-    });
+    if (userType !== "Admin") {
+        res.status(422).json("Only Admins can add a game!");
+    } else {
+        gameDB.postGame(title, description, price, platform, categoryid, year, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json(err);
+            } else {
+                console.log(result);
+                res.status(201).json({ "gameid": result });
+            }
+        });
+    }
 });
 
 //7
@@ -412,6 +416,16 @@ router.get("/platforms", (req, res) => {
     });
 });
 
+//17
+router.get("/categories", (req, res) => {
+    catDB.getAllCategories((err, result) => {
+        if (err) {
+            res.status(500).json(err);
+        } else {
+            res.status(200).json(result);
+        }
+    });
+});
 //17 Get game by id
 router.get("/game/:gameid", (req, res) => {
     var gameid = req.params.gameid;

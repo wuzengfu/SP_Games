@@ -27,6 +27,7 @@ var gameDB = {
                     price, priceNum,
                     platform, platformNum
                 ], (err, result) => {
+                    conn.end();
                     if (err) {
                         return callback(err, null);
                     } else {

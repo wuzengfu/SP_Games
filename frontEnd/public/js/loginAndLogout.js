@@ -50,14 +50,15 @@ $("#logout").click(() => {
     $('#logoutModal').modal('show');
     $('#logoutHeader').text('Hi, ' + $('#loginName').text());
 });
-$('#logoutConfirm').click(() => {
+const logoutConfirm = function (source) {
+    var redirectedLink = source == 'details' ? './details.html' : './index.html';
     window.localStorage.removeItem('userid');
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('userType');
     window.localStorage.removeItem('username');
-    window.location.reload();
+    window.location.assign(redirectedLink);
     alert("You have logged out successfully!");
-});
+}
 
 /* Show Login Modal when login is pressed */
 $('#loginBar').click(() => {

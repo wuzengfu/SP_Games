@@ -31,7 +31,7 @@
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex justify-content-center">
 
-        <div class="d-flex w-50">
+        <div class="d-flex" style="width: 65%;">
             <a class=" navbar-brand" href="#"><img src="./images/sp_games.png" class="img-fluid"
                     style="width: 2.6rem"></a>
             <ul class="navbar-nav">
@@ -86,9 +86,10 @@
     <div class="container mt-3 d-flex justify-content-center" style="width: 83%;">
         <div>
             <!-- Search function -->
-            <div class="form-group row justify-content-between container ml-5" style="width:80%;">
+            <div class="form-group row justify-content-between">
 
                 <!-- Game Title -->
+                <div class="col-1"></div>
                 <div class="col-4">
                     <div class="input-group">
                         <div class="input-group-prepend">
@@ -98,16 +99,18 @@
                     </div>
                 </div>
 
+                <div class="col-1"></div>
                 <!-- Max Price -->
                 <div class="col-5 form-group row">
                     <label for="maxPrice" class="col-form-label">Max Price:</label>
-                    <div class="col-7">
+                    <div class="col-5">
                         <input type="num" id="maxPrice" class="form-control">
                     </div>
                     <div class="col-1">
                         <button type="submit" id="search_game" class="btn btn-success">Search</button>
                     </div>
                 </div>
+                <div class="col-1"></div>
             </div>
 
             <!-- Search by Platform -->
@@ -123,6 +126,7 @@
 
             <!-- Game Results -->
             <div class="row" style="margin-left:4%;" id="gameResults"></div>
+            <div class="row" style="margin-left:4%;"></div>
 
         </div><!-- inner-container -->
     </div><!-- outer-container -->
@@ -196,6 +200,13 @@
 
 <!-- Login and Logout javascript -->
 <script src="./js/loginAndLogout.js"></script>
+
+<!-- Logout Confirm -->
+<script>
+    $('#logoutConfirm').click(() => {
+        logoutConfirm("index");
+    });
+</script>
 
 <!-- Filtering Games function -->
 <script>

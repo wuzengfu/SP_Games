@@ -116,6 +116,27 @@ var catDB = {
                 });
             }
         });
+    },
+
+    //17 Get all Categories
+    getAllCategories: function (callback) {
+        var conn = db.getConnection();
+
+        conn.connect(err => {
+            if (err) {
+                return callback("Unknown error", null);
+            } else {
+                var sql = "SELECT catid , catname FROM category";
+                conn.query(sql, (err, result) => {
+                    conn.end();
+                    if (err) {
+                        return callback("Unknown error", null);
+                    } else {
+                        return callback(null, result);
+                    }
+                });
+            }
+        });
     }
 };
 
