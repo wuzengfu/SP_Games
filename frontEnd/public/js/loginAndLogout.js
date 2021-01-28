@@ -1,5 +1,8 @@
 $(document).ready(function () {
     let value = window.localStorage.getItem('userid');
+    if (window.localStorage.getItem('userType') !== 'Admin') {
+        $('#editGames').hide();
+    }
     $('#loginFailed').hide();
     if (value != null || value != undefined) {
         $('#loginDropdown').hide();
@@ -10,6 +13,7 @@ $(document).ready(function () {
     } else {
         $('#logoutDropdown').hide();
         //$('#loginModal').modal('show');
+        //fromBuffer , mv , req.files
     }
 });
 
@@ -32,9 +36,9 @@ $('#loginForm').submit((eve) => {
                 $('#loginName').text(res.data.user_name);
                 alert('Hello! ' + res.data.user_name);
                 $('#loginModal').modal('hide');
-                $('#logoutDropdown').show();
-                $('#loginDropdown').hide();
-                $('#loginBar').hide();
+                // $('#logoutDropdown').show();
+                // $('#loginDropdown').hide();
+                // $('#loginBar').hide();
                 window.location.reload();
             } else {
                 alert("Please enter the correct password or email!");

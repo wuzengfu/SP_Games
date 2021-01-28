@@ -18,8 +18,33 @@ var cors = require('cors');
 router.options('*', cors());
 router.use(cors());
 
-router.use(express.urlencoded({ extended: false }));
-router.use(express.json());
+var bodyParser = require('body-parser')
+router.use(bodyParser.urlencoded({ extended: true }));
+router.use(bodyParser.json());
+
+//Filter Games
+router.get("/games/filter/:data", (req, res) => {
+    var data = JSON.parse(req.params.data);
+    var { platform, title, price } = data;
+
+    if (platform == 'all' || platform == undefined) platform = "";
+
+    var pattern = "";
+    pattern += title == undefined ? 0 : 1;
+    pattern += price == "" ? 0 : 1;
+    pattern += platform == "" ? 0 : 1;
+
+
+    //101
+    gameDB.filterGames(title, price, platform, pattern, (err, result) => {
+        if (err) {
+            console.log(err);
+            res.status(500).send();
+        } else {
+            res.status(200).send(result);
+        }
+    });
+});
 
 //0
 router.post("/login/", function (req, res) {

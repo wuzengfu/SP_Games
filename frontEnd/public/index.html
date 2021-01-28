@@ -43,8 +43,24 @@
                 <li class="nav-item active"> <a class="nav-link" href="./index.html">HOME <span
                             class="sr-only">(current)</span></a> </li>
                 <li class="nav-item"> <a class="nav-link" href="./details.html">GAMES</a> </li>
+
+                <li class="nav-item dropdown" id="editGames">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        EDIT
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="#">
+                            Add Games
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            Add Categories
+                        </a>
+                    </div>
+                </li>
+
                 <li class="nav-item"> <a class="nav-link" href="#" id="loginBar">LOGIN</a> </li>
-                <li class="nav-item dropdown" id="logoutDropdown" style="margin-left:300%;">
+                <li class="nav-item dropdown" id="logoutDropdown" style="margin-left:200%;">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
                         <img src="./images/loginUser.png" class="img mr-2" width="30" height="30"><span
@@ -221,11 +237,7 @@
         });
 </script>
 
-<!-- Filter Game Results -->
 <script>
-    var platform = $("#searchByPlatform option:selected").val();
-
-    /* When platform's value changed */
     $("#searchByPlatform").change(function () {
         platform = $("#searchByPlatform option:selected").val();
         filterGames();
@@ -237,44 +249,21 @@
     /* When maxPrice changed */
     $("#maxPrice").change(function () { filterGames() });
 
-    /* When Search button is pressed */
-    $("#search_game").click(function () { filterGames() });
 
-    /* Search button to filter games */
-    function filterGames() {
-        if (platform == 'all') platform = 'null';
+    const filterGames = () => {
+        var price = $('#maxPrice').val();
+        var title = $('#search').val();
+        var platform = $("#searchByPlatform option:selected").val();
 
-        var title = $("#search").val();
-        var price = $("#maxPrice").val();
+        var requestBody = JSON.stringify({ price: price, title: title, platform: platform });
 
-        axios.get(`${baseUrl}/games/${platform}`).
-            then((res) => {
-                var games = res.data;
-                var gamesByTitle = [];
+        axios.get(`${baseUrl}/games/filter/${requestBody}`).then((res) => {
+            var games = res.data;
+            var result = "";
 
-                games.forEach(ele => {
-                    if (ele.title.toLowerCase().includes(title.toLowerCase())) {
-                        gamesByTitle.push(ele);
-                    }
-                });
-
-                games = gamesByTitle;
-
-                if (price !== "") {
-                    var gamesByPrice = [];
-                    games.forEach(ele => {
-                        if (ele.price <= price * 1) {
-                            gamesByPrice.push(ele);
-                        }
-                    });
-
-                    games = gamesByPrice;
-                }
-
-                var result = "";
-                games.forEach(ele => {
-                    if (ele.image == null || ele.image == '') ele.image = "emptyGame.jpg";
-                    result += `
+            games.forEach(ele => {
+                if (ele.image == null || ele.image == '') ele.image = "emptyGame.jpg";
+                result += `
                             <div class="card col-3 text-center mb-3 pr-0 pl-0" style="margin-left: 5%;">
                     <img src='./images/${ele.image}' class="card-img-top">
                     <div class="card-body">
@@ -284,13 +273,12 @@
                     </div>
                 </div>
                 `;
-                });
-                $('#gameResults').html(result);
-
-            }).catch(err => {
-                console.log(err);
             });
-    };
+            $('#gameResults').html(result);
+        }).catch((err) => {
+            console.log(err);
+        });
+    }
 </script>
 
 <!-- Go to Details page -->
