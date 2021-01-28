@@ -24,19 +24,13 @@ router.use(bodyParser.json());
 
 //Filter Games
 router.get("/games/filter/:data", (req, res) => {
-    var data = JSON.parse(req.params.data);
-    var { platform, title, price } = data;
+    var { title, price, platform } = JSON.parse(req.params.data);
 
-    if (platform == 'all' || platform == undefined) platform = "";
+    const titleNum = title == "" ? 0 : 1;
+    const priceNum = price == "" ? 0 : 1;
+    const platformNum = platform == "" ? 0 : 1;
 
-    var pattern = "";
-    pattern += title == undefined ? 0 : 1;
-    pattern += price == "" ? 0 : 1;
-    pattern += platform == "" ? 0 : 1;
-
-
-    //101
-    gameDB.filterGames(title, price, platform, pattern, (err, result) => {
+    gameDB.filterGames(title, price, platform, titleNum, priceNum, platformNum, (err, result) => {
         if (err) {
             console.log(err);
             res.status(500).send();
@@ -44,6 +38,7 @@ router.get("/games/filter/:data", (req, res) => {
             res.status(200).send(result);
         }
     });
+
 });
 
 //0

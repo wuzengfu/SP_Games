@@ -1,9 +1,10 @@
+/* Handle the visibility of login button , logout menu, Edit button based on usertype */
 $(document).ready(function () {
     let value = window.localStorage.getItem('userid');
+    $('#loginFailed').hide();
     if (window.localStorage.getItem('userType') !== 'Admin') {
         $('#editGames').hide();
     }
-    $('#loginFailed').hide();
     if (value != null || value != undefined) {
         $('#loginDropdown').hide();
         $('#loginBar').hide();
@@ -12,16 +13,12 @@ $(document).ready(function () {
         $('#loginModal').modal('hide');
     } else {
         $('#logoutDropdown').hide();
-        //$('#loginModal').modal('show');
-        //fromBuffer , mv , req.files
     }
 });
 
 /* Verify Login */
 $('#loginForm').submit((eve) => {
     eve.preventDefault();
-    var email = $('#email').val();
-    var password = $('#password').val();
     const requestBody = {
         email: $("#email").val(),
         password: $("#password").val()
@@ -36,9 +33,6 @@ $('#loginForm').submit((eve) => {
                 $('#loginName').text(res.data.user_name);
                 alert('Hello! ' + res.data.user_name);
                 $('#loginModal').modal('hide');
-                // $('#logoutDropdown').show();
-                // $('#loginDropdown').hide();
-                // $('#loginBar').hide();
                 window.location.reload();
             } else {
                 alert("Please enter the correct password or email!");
@@ -63,9 +57,6 @@ $('#logoutConfirm').click(() => {
     window.localStorage.removeItem('username');
     window.location.reload();
     alert("You have logged out successfully!");
-    // $('#logoutModal').modal('hide');
-    // $('#logoutDropdown').hide();
-    // $('#loginBar').show();
 });
 
 /* Show Login Modal when login is pressed */

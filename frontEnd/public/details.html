@@ -21,15 +21,15 @@
 
 <body style="background-image:url('./images/background_img.png');">
     <!-- Navigation bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
-        <a class="navbar-brand" href="#"><img src="./images/sp_games.png" class="img-fluid" style="width: 2.6rem"></a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex justify-content-center">
 
-        <div class="collapse navbar-collapse justify-content-left">
+        <div class="d-flex w-50">
+            <a class=" navbar-brand" href="#"><img src="./images/sp_games.png" class="img-fluid"
+                    style="width: 2.6rem"></a>
             <ul class="navbar-nav">
                 <li class="nav-item"> <a class="nav-link" href="./index.html">HOME <span
-                            class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item active"> <a class="nav-link" href="#">GAMES</a> </li>
+                            class="sr-only">(current)</span></a> </li>
+                <li class="nav-item active"> <a class="nav-link" href="./details.html">GAMES</a> </li>
 
                 <li class="nav-item dropdown" id="editGames">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
@@ -37,10 +37,10 @@
                         EDIT
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="./addGames.html">
                             Add Games
                         </a>
-                        <a class="dropdown-item" href="#">
+                        <a class="dropdown-item" href="./addCategories.html">
                             Add Categories
                         </a>
                     </div>
@@ -48,8 +48,11 @@
 
                 <li class="nav-item"> <a class="nav-link" href="#" id="loginBar">LOGIN</a> </li>
 
-                <li class="nav-item dropdown" id="logoutDropdown" style="margin-left:200%;">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown ms-auto" id="logoutDropdown">
+                    <a class=" nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
                         <img src="./images/loginUser.png" class="img mr-2" width="30" height="30"><span
                             id="loginName">N/A</span>
@@ -209,13 +212,17 @@
     const baseUrl = "http://localhost:3001";
 </script>
 
+<!-- Login and Logout javascript -->
 <script src="./js/loginAndLogout.js"></script>
 
 <!-- Initialize game details and reviews -->
 <script>
     var gameid = window.localStorage.getItem('gameid').toString();
-    //window.localStorage.removeItem('gameid');
+
+    /* Get Game details and Reviews */
     const getGameDetails = () => {
+
+        /* Get game details */
         axios.get(`${baseUrl}/game/${gameid}`)
             .then((res) => {
                 var game = res.data;
@@ -242,7 +249,7 @@
                 console.log(err);
             });
 
-
+        /* Get game reviews */
         axios.get(`${baseUrl}/game/${gameid}/review`)
             .then((res) => {
                 var reviews = res.data;
@@ -300,13 +307,13 @@
                 }
             })
                 .then((response) => {
-                    $("#create-post-form").trigger('reset');
                     getGameDetails();
                 }).catch(err => {
                     console.log(err);
                     alert("Only Customer can add a review!");
                 });
         }
+        setTimeout(function () { $("#create-post-form").trigger('reset'); }, 1200);
     });
 </script>
 

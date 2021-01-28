@@ -5,120 +5,36 @@
 */
 var db = require('./databaseConfig.js');
 var fs = require('fs');
-const { connect } = require('../controller/router.js');
-const { clearLine } = require('readline');
 
 var gameDB = {
-    filterGames: function (title, price, platform, pattern, callback) {
+    filterGames: function (title, price, platform, titleNum, priceNum, platformNum, callback) {
         var conn = db.getConnection();
 
         conn.connect(err => {
             if (err) {
                 return callback('error', null);
             } else {
-                console.log('connected!');
-                var sql;
-                if (price == null || price == 0) price = Number.MAX_VALUE;
+                title = "%" + title + "%";
 
-                if (pattern == "000" || pattern == "010") {
-                    sql = "SELECT * FROM game WHERE price < ?;";
-                    conn.query(sql, [price], (err, result) => {
-                        if (err) {
-                            return callback(err, null);
-                        } else {
-                            return callback(null, result);
-                        }
-                    });
-                } else if (pattern == "001" || pattern == "011") {
-                    sql = "SELECT * FROM game WHERE price < ? AND platform = ?;";
-                    conn.query(sql, [price, platform], (err, result) => {
-                        if (err) {
-                            return callback(err, null);
-                        } else {
-                            return callback(null, result);
-                        }
-                    });
-                } else if (pattern == "110" || pattern == "100") {
-                    sql = "SELECT * FROM game WHERE price < ? AND title LIKE ?";
-                    conn.query(sql, [price, "%" + title + "%"], (err, result) => {
-                        if (err) {
-                            return callback(err, null);
-                        } else {
-                            return callback(null, result);
-                        }
-                    });
-                } else {//101 111
-                    sql = "SELECT * FROM game WHERE price < ? AND title LIKE ? AND platform = ?";
-                    conn.query(sql, [price, "%" + title + "%", platform], (err, result) => {
-                        if (err) {
-                            return callback(err, null);
-                        } else {
-                            return callback(null, result);
-                        }
-                    });
-                }
+                var sql =
+                    `SELECT * FROM game WHERE
+                (title LIKE ? OR 0 = ?) AND
+                (price < ? OR 0 = ?) AND
+                (platform = ? OR 0 = ?);`;
 
+                conn.query(sql, [
+                    title, titleNum,
+                    price, priceNum,
+                    platform, platformNum
+                ], (err, result) => {
+                    if (err) {
+                        return callback(err, null);
+                    } else {
+                        return callback(null, result);
+                    }
+                });
             }
-        })
-
-
-        /*  conn.connect(err => {
-             if (err) {
-                 return callback("Error", null);
-             } else {
-                 console.log("Connected!");
-                 var sql;
-                 if (price == 0) price = Number.MAX_VALUE;
-                 if (platform == "" || platform == null || platform == undefined) {
-                     sql = "SELECT * FROM game WHERE price < ? AND title LIKE ?";
-                     if (title == null || title == undefined || title == "") {
-                         sql = "SELECT * FROM game WHERE price < ?;"
-                         conn.query(sql, [price], (err, result) => {
-                             if (err) {
-                                 return callback(err, null);
-                             } else {
-                                 return callback(null, result);
-                             }
-                         });
-                     } else {
-                         conn.query(sql, [price, "%" + title + "%"], (err, result) => {
-                             if (err) {
-                                 return callback(err, null);
-                             } else {
-                                 console.log(result);
-                                 return callback(null, result);
-                             }
-                         });
-                     }
-                 } else {
-                     sql = "SELECT * FROM game WHERE price < ? AND title LIKE ? AND platform = ?";
-                     if (title == null || title == undefined || title == "") {
-                         sql = "SELECT * FROM game WHERE price < ? AND platform = ?;";
-                         conn.query(sql, [price, platform], (err, result) => {
-                             console.log(platform);
-                             console.log(price);
-                             console.log(title);
-                             if (err) {
-                                 return callback(err, null);
-                             } else {
-                                 console.log("50----------");
-                                 return callback(null, result);
-                             }
-                         });
-                     }
-                     else {
-                         conn.query(sql, [price, "%" + title + "%", platform], (err, result) => {
-                             if (err) {
-                                 return callback(err, null);
-                             } else {
-                                 console.log("60----------");
-                                 return callback(null, result);
-                             }
-                         });
-                     }
-                 }
-             }
-         }) */
+        });
     },
 
     /**
