@@ -13,12 +13,13 @@ var reviewDB = require('../model/reviewDB');
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config.js");
 const verifyToken = require("../auth/verifyToken");
+const parseJwt = require("../auth/parseJwt");
 var cors = require('cors');
 
 router.options('*', cors());
 router.use(cors());
 
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
@@ -43,18 +44,10 @@ router.get("/games/filter/:data", (req, res) => {
 
 //0
 router.post("/login/", function (req, res) {
-    console.log('----------------------------');
     var { email, password } = req.body;
-    console.log(req.body);
-    console.log(email);
-    console.log(password);
-
-
     userDB.verify(
-        req.body.email,
-        req.body.password,
+        email, password,
         (error, user) => {
-
             if (error) {
                 res.status(500).send();
                 return;
@@ -138,26 +131,31 @@ router.get("/users/:id/", (req, res) => {
 });
 
 //4
-router.post("/category", (req, res) => {
+router.post("/category", verifyToken, (req, res) => {
     var { catname, description } = req.body;
 
-    catDB.postCategory(catname, description, (err, result) => {
-        if (err) {
-            console.log(err);
-            res.status(500).json("Unknown error");
-        } else {
-            console.log(result);
-            if (result === -1) {
-                res.status(422).json("The category name provided already exists.");
+    const token = req.headers.authorization.replace("Bearer ", "");
+    if (parseJwt(token) !== "Admin") {
+        res.status(401).json("Only Admins can add a game!");
+    } else {
+        catDB.postCategory(catname, description, (err, result) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json("Unknown error");
             } else {
-                res.status(204).json();
+                console.log(result);
+                if (result === -1) {
+                    res.status(422).json("The category name " + catname + " already exists.");
+                } else {
+                    res.status(204).json();
+                }
             }
-        }
-    });
+        });
+    }
 });
 
 //5
-router.put("/category/:id/", verifyToken, (req, res) => {
+router.put("/category/:id/", (req, res) => {
     var { catname, description } = req.body;
     var id = req.params.id;
 
@@ -182,18 +180,23 @@ router.put("/category/:id/", verifyToken, (req, res) => {
 
 //6
 router.post("/game", verifyToken, (req, res) => {
-    var { title, description, price, platform, categoryid, year, userType } = req.body;
+    var { title, description, price, platform, categoryid, year } = req.body;
 
-    if (userType !== "Admin") {
-        res.status(422).json("Only Admins can add a game!");
+    const token = req.headers.authorization.replace("Bearer ", "");
+    if (parseJwt(token) !== "Admin") {
+        res.status(401).json("Only Admins can add a game!");
     } else {
         gameDB.postGame(title, description, price, platform, categoryid, year, (err, result) => {
             if (err) {
                 console.log(err);
                 res.status(500).json(err);
             } else {
-                console.log(result);
-                res.status(201).json({ "gameid": result });
+                if (result === -1) {
+                    res.status(422).json("The game title " + title + " has already existed!");
+                } else {
+                    res.status(201).json({ "gameid": result });
+                    console.log(result);
+                }
             }
         });
     }
@@ -208,7 +211,6 @@ router.get("/games/:platform", (req, res) => {
             console.log(err);
             res.status(500).json(err);
         } else {
-            console.log(result);
             if (result === -1) {
                 res.status(422).json("Cannot find the platform of " + platform + " !");
             } else {
@@ -269,23 +271,22 @@ router.post("/user/:uid/game/:gid/review/", verifyToken, (req, res) => {
     var uid = req.params.uid * 1;
     var gid = req.params.gid * 1;
 
-    var { content, rating, type } = req.body;
+    var { content, rating } = req.body;
 
     if (isNaN(uid) || isNaN(gid)) {
         res.status(422).json("userId or gameId is not a number!");
-    } else if (type != "Customer") {
-        res.status(422).json("Must be a customer!");
     } else {
         reviewDB.postReview(uid, gid, content, rating, (err, result) => {
             if (err) {
                 console.log(err);
                 res.status(500).json("Unknown error");
             } else {
-                console.log(result);
                 if (result === -1) {
                     res.status(422).json("GameId '" + gid + "' does not exist!");
                 } else if (result === -2) {
                     res.status(422).json("UserId '" + uid + "' does not exist!");
+                } else if (result === -3) {
+                    res.status(422).json("Only Customers can add a review!");
                 } else {
                     res.status(201).type('json').json({ "reviewid": result.insertId });
                 }

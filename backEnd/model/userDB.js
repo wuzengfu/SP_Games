@@ -116,7 +116,7 @@ var userDB = {
                     } else if (result.length === 0) {
                         return callback(null, -1);
                     } else {
-                        return callback(null, result);
+                        return callback(null, result[0]);
                     }
                 })
             }

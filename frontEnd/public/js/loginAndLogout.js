@@ -2,9 +2,17 @@
 $(document).ready(function () {
     let value = window.localStorage.getItem('userid');
     $('#loginFailed').hide();
-    if (window.localStorage.getItem('userType') !== 'Admin') {
-        $('#editGames').hide();
-    }
+
+    axios.get(`${baseUrl}/users/${value}/`).then(res => {
+        if (res.data.type !== "Admin") {
+            $('#editGames').hide();
+        }
+    }).catch(err => {
+        if (err.response.status === 422) {
+            $('#editGames').hide();
+        }
+    })
+
     if (value != null || value != undefined) {
         $('#loginDropdown').hide();
         $('#loginBar').hide();
@@ -28,7 +36,6 @@ $('#loginForm').submit((eve) => {
             if (res != null) {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('userid', res.data.user_id);
-                localStorage.setItem('userType', res.data.user_type);
                 localStorage.setItem('username', res.data.user_name);
                 $('#loginName').text(res.data.user_name);
                 alert('Hello! ' + res.data.user_name);
@@ -54,7 +61,6 @@ const logoutConfirm = function (source) {
     var redirectedLink = source == 'details' ? './details.html' : './index.html';
     window.localStorage.removeItem('userid');
     window.localStorage.removeItem('token');
-    window.localStorage.removeItem('userType');
     window.localStorage.removeItem('username');
     window.location.assign(redirectedLink);
     alert("You have logged out successfully!");

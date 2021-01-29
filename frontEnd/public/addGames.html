@@ -7,7 +7,7 @@
     <title>SP Games</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-        
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
         integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
@@ -218,7 +218,6 @@
         var year = $('#year').val();
         var categoryid = $('#category').val();
         var description = $('#description').val();
-        var userType = window.localStorage.getItem('userType');
 
         var requestBody = {
             title: title,
@@ -227,18 +226,26 @@
             year: year,
             categoryid: categoryid,
             description: description,
-            userType: userType
         };
 
         axios.post(`${baseUrl}/game`, requestBody, {
             headers: {
                 "Authorization": `Bearer ${window.localStorage.getItem('token')}`
             }
-        }).then((res) => {
+        }).then(res => {
             alert("The game has been added successfully!");
-        }).catch((err) => {
-            console.log(err);
-        });
+            $('#addGameForm').trigger('reset');
+            $('#title').removeClass('border-danger');
+        })
+            .catch(err => {
+                if (err.response.status === 422) {
+                    alert(err.response.data);
+                    $('#title').addClass('border-danger');
+                } else if (err.response.status === 401) {
+                    alert(err.response.data);
+                }
+                console.log(err);
+            });
     });
 </script>
 

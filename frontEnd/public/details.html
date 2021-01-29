@@ -295,31 +295,29 @@
         // prevents the page from refreshing
         event.preventDefault();
 
-        if (window.localStorage.getItem('userid') == null) {
-            alert('Only registered members can add a review!');
-            $('#loginModal').modal('show');
-        } else {
-            const uid = window.localStorage.getItem('userid');
-            const gid = window.localStorage.getItem('gameid');
-            const requestBody = {
-                content: $("#comment").val(),
-                rating: $('#rating').val(),
-                type: window.localStorage.getItem('userType')
-            };
-            const header = `Bearer ${window.localStorage.getItem('token')}`;
+        const uid = window.localStorage.getItem('userid');
+        const gid = window.localStorage.getItem('gameid');
+        const requestBody = {
+            content: $("#comment").val(),
+            rating: $('#rating').val(),
+        };
+        const header = `Bearer ${window.localStorage.getItem('token')}`;
 
-            axios.post(`${baseUrl}/user/${uid}/game/${gid}/review/`, requestBody, {
-                headers: {
-                    Authorization: header
-                }
-            })
-                .then((response) => {
-                    getGameDetails();
-                }).catch(err => {
-                    console.log(err);
-                    alert("Only Customer can add a review!");
-                });
-        }
+        axios.post(`${baseUrl}/user/${uid}/game/${gid}/review/`, requestBody, {
+            headers: {
+                Authorization: header
+            }
+        }).then((response) => {
+            getGameDetails();
+        }).catch(err => {
+            if (err.response.status === 422) {
+                alert(err.response.data);
+            } else if (err.response.status === 401) {
+                alert('Only registered members can add a review!');
+                $('#loginModal').modal('show');
+            }
+        });
+
         setTimeout(function () { $("#create-post-form").trigger('reset'); }, 1200);
     });
 </script>

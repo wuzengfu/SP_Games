@@ -62,7 +62,7 @@ var gameDB = {
                     } else {
                         //duplicate game title
                         if (result.length !== 0) {
-                            return callback("Game title of " + title + " already exists!", null);
+                            return callback(null, -1);
                         } else {
                             //new game
                             sql = "INSERT INTO game (title, description, price, platform, year) VALUES (?,?,?,?,?);";

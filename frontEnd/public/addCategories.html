@@ -72,6 +72,32 @@
             </ul>
         </div>
     </nav><!-- nav-bar -->
+
+
+    <div class="d-flex justify-content-center container mt-5">
+        <div
+            class="mt-3 d-flex justify-content-center bg-white w-25 pt-3 pb-3 border border-secondary rounded shadow-lg">
+
+            <form id="addCategoryForm">
+                <h4 class="mb-3">Add a Category:</h4>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Category Name:</label>
+                    <input type="text" class="form-control" id="category" placeholder="Enter name of category" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Description:</label>
+                    <textarea id="description" rows="5" placeholder="Enter the description:" class="form-control"
+                        required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block">Add Category</button>
+                <button type="reset" class="btn btn-danger btn-block">Cancel</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal for login page -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-md modal-dialog-centered">
@@ -145,7 +171,41 @@
 <!-- Logout Confirm -->
 <script>
     $('#logoutConfirm').click(() => {
-        logoutConfirm("addCategories");
+        logoutConfirm("addCategories.html");
+    });
+</script>
+
+<!-- Submit AddCategoryForm -->
+<script>
+    $('#addCategoryForm').submit(function (eve) {
+        eve.preventDefault();
+        var categoryName = $('#category').val();
+        var categoryDescription = $('#description').val();
+
+        var requestBody = { catname: categoryName, description: categoryDescription };
+
+        axios.post(`${baseUrl}/category/`,
+            requestBody,
+            {
+                headers:
+                {
+                    authorization: "Bearer " + window.localStorage.getItem('token')
+                }
+            }).then(res => {
+                $('#category').removeClass('border-danger');
+                $('#addCategoryForm').trigger('reset');
+                alert('The new category has been added successfully!');
+            }).catch(err => {
+                if (err.response.status === 401) {
+                    alert('Unauthorized! Only Admins can add a category!');
+                } else if (err.response.status === 422) {
+                    $('#category').addClass('border-danger');
+                    alert(err.response.data);
+                } else {
+                    alert(err.response.data);
+                }
+                console.log(err);
+            });
     });
 </script>
 
