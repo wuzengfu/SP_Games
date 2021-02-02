@@ -182,7 +182,11 @@
         var categoryName = $('#category').val();
         var categoryDescription = $('#description').val();
 
-        var requestBody = { catname: categoryName, description: categoryDescription };
+        var requestBody = {
+            catname: categoryName,
+            description: categoryDescription,
+            type: window.localStorage.getItem('userType')
+        };
 
         axios.post(`${baseUrl}/category/`,
             requestBody,
