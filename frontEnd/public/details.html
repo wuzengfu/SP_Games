@@ -253,6 +253,10 @@
                 $("#category").text(categories);
                 $("#image").attr("src", `./images/${game.image}`);
             }).catch((err) => {
+                if (err.response.status === 422) {
+                    alert("Something wrong here!");
+                    window.location.assign('./index.html');
+                }
                 console.log(err);
             });
 
@@ -297,9 +301,11 @@
 
         const uid = window.localStorage.getItem('userid');
         const gid = window.localStorage.getItem('gameid');
+        const type = window.localStorage.getItem('userType');
         const requestBody = {
             content: $("#comment").val(),
             rating: $('#rating').val(),
+            type: type
         };
         const header = `Bearer ${window.localStorage.getItem('token')}`;
 
@@ -308,6 +314,7 @@
                 Authorization: header
             }
         }).then((response) => {
+            alert("Your record has been updated!");
             getGameDetails();
         }).catch(err => {
             if (err.response.status === 422) {
