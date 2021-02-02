@@ -1,3 +1,8 @@
+/*
+  Name: Wu Zengfu
+  Admission Number: 2033457
+  Class: DIT/04
+*/
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config.js");
 

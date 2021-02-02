@@ -8,5 +8,5 @@ const hostname = 'localhost';
 const port = 3001;
 
 const server = router.listen(port, function () {
-  console.log(`Web App Hosted at http://${hostname}:${port}`);
+  console.log(`Backend Server Hosted at http://${hostname}:${port}`);
 });
