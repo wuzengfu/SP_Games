@@ -27,27 +27,14 @@ var reviewDB = {
                         if (result.length === 0) {
                             return callback(null, -1);
                         } else {
-                            sql = "SELECT username,type FROM user WHERE userid = ?;";
-                            conn.query(sql, [uid], (err, result) => {
+                            sql = "INSERT INTO reviews (posterid,gameid,content,rating) VALUES (?,?,?,?);";
+                            conn.query(sql, [uid, gid, content, rating], (err, result) => {
+                                conn.end();
                                 if (err) {
                                     return callback(err, null);
                                 } else {
-                                    if (result.length === 0) {
-                                        return callback(null, -2);
-                                    } else if (result[0].type !== "Customer") {
-                                        return callback(null, -3);
-                                    } else {
-                                        sql = "INSERT INTO reviews (posterid,gameid,content,rating) VALUES (?,?,?,?);";
-                                        conn.query(sql, [uid, gid, content, rating], (err, result) => {
-                                            conn.end();
-                                            if (err) {
-                                                return callback(err, null);
-                                            } else {
-                                                return callback(null, result);
-                                            };
-                                        });
-                                    }
-                                }
+                                    return callback(null, result);
+                                };
                             });
                         }
                     }
