@@ -7,7 +7,7 @@ var db = require('./databaseConfig.js');
 var fs = require('fs');
 
 var gameDB = {
-    filterGames: function (title, price, platform, titleNum, priceNum, platformNum, callback) {
+    filterGames: function (title, price, platform, titleVerify, priceVerify, platformVerify, callback) {
         var conn = db.getConnection();
 
         conn.connect(err => {
@@ -18,14 +18,14 @@ var gameDB = {
 
                 var sql =
                     `SELECT * FROM game WHERE
-                (title LIKE ? OR 0 = ?) AND
-                (price < ? OR 0 = ?) AND
-                (platform = ? OR 0 = ?);`;
+                (title LIKE ? OR ?) AND
+                (price < ? OR ?) AND
+                (platform = ? OR ?);`;
 
                 conn.query(sql, [
-                    title, titleNum,
-                    price, priceNum,
-                    platform, platformNum
+                    title, titleVerify,
+                    price, priceVerify,
+                    platform, platformVerify
                 ], (err, result) => {
                     conn.end();
                     if (err) {
@@ -478,22 +478,6 @@ var gameDB = {
 
     getGameById: function (gameid, callback) {
         var conn = db.getConnection();
-        // conn.connect(err => {
-        //     var gameDetails;
-        //     if (err) {
-        //         return callback(err, null);
-        //     } else {
-        //         var sql = "SELECT * FROM game WHERE gameid = ?;";
-        //         conn.query(sql, [gameid], (err, result) => {
-        //             if (err) {
-        //                 return callback(err, null);
-        //             } else {
-        //                 sql = "SELECT * FROM game"
-        //                 return callback(null, result);
-        //             }
-        //         });
-        //     }
-        // });
         conn.connect(err => {
             if (err) {
                 return callback("Unknown error", null);
@@ -507,22 +491,22 @@ var gameDB = {
                     if (err) {
                         return callback("Unknown error", null);
                     } else {
-                        gameDetails = result[0];
-                        console.log(gameDetails);
-                        sql = "SELECT c.catname FROM category c, game_categories WHERE game_categories.gameid = ? AND game_categories.catid = c.catid;";
-                        conn.query(sql, [gameid], (err, result) => {
-                            console.log(result);
-                            conn.end();
-                            if (err) {
-                                console.log(err);
-                                return callback("Unknown error", null);
-                            } else {
-                                gameDetails.categories = result;
-                                console.log(gameDetails);
-                                return callback(null, gameDetails);
-                            }
-                        });
-
+                        if (result.length === 0) {
+                            return callback(null, -1);
+                        } else {
+                            gameDetails = result[0];
+                            sql = "SELECT c.catname FROM category c, game_categories WHERE game_categories.gameid = ? AND game_categories.catid = c.catid;";
+                            conn.query(sql, [gameid], (err, result) => {
+                                conn.end();
+                                if (err) {
+                                    console.log(err);
+                                    return callback("Unknown error", null);
+                                } else {
+                                    gameDetails.categories = result;
+                                    return callback(null, gameDetails);
+                                }
+                            });
+                        }
 
                     }
                 });

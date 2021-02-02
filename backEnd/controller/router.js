@@ -13,7 +13,6 @@ var reviewDB = require('../model/reviewDB');
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config.js");
 const verifyToken = require("../auth/verifyToken");
-const parseJwt = require("../auth/parseJwt");
 var cors = require('cors');
 
 router.options('*', cors());
@@ -23,15 +22,17 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
+var path = require('path');
+
 //Filter Games
 router.get("/games/filter/:data", (req, res) => {
     var { title, price, platform } = JSON.parse(req.params.data);
 
-    const titleNum = title == "" ? 0 : 1;
-    const priceNum = price == "" ? 0 : 1;
-    const platformNum = platform == "" ? 0 : 1;
+    const titleVerify = title == "";
+    const priceVerify = price == "";
+    const platformVerify = platform == "";
 
-    gameDB.filterGames(title, price, platform, titleNum, priceNum, platformNum, (err, result) => {
+    gameDB.filterGames(title, price, platform, titleVerify, priceVerify, platformVerify, (err, result) => {
         if (err) {
             console.log(err);
             res.status(500).send();
@@ -132,10 +133,9 @@ router.get("/users/:id/", (req, res) => {
 
 //4
 router.post("/category", verifyToken, (req, res) => {
-    var { catname, description } = req.body;
+    var { catname, description, type } = req.body;
 
-    const token = req.headers.authorization.replace("Bearer ", "");
-    if (parseJwt(token) !== "Admin") {
+    if (type !== "Admin") {
         res.status(401).json("Only Admins can add a game!");
     } else {
         catDB.postCategory(catname, description, (err, result) => {
@@ -180,13 +180,12 @@ router.put("/category/:id/", (req, res) => {
 
 //6
 router.post("/game", verifyToken, (req, res) => {
-    var { title, description, price, platform, categoryid, year } = req.body;
+    var { title, description, price, platform, categories, year, type } = req.body;
 
-    const token = req.headers.authorization.replace("Bearer ", "");
-    if (parseJwt(token) !== "Admin") {
+    if (type !== "Admin") {
         res.status(401).json("Only Admins can add a game!");
     } else {
-        gameDB.postGame(title, description, price, platform, categoryid, year, (err, result) => {
+        gameDB.postGame(title, description, price, platform, categories, year, (err, result) => {
             if (err) {
                 console.log(err);
                 res.status(500).json(err);
@@ -271,10 +270,12 @@ router.post("/user/:uid/game/:gid/review/", verifyToken, (req, res) => {
     var uid = req.params.uid * 1;
     var gid = req.params.gid * 1;
 
-    var { content, rating } = req.body;
+    var { content, rating, type } = req.body;
 
     if (isNaN(uid) || isNaN(gid)) {
         res.status(422).json("userId or gameId is not a number!");
+    } else if (type == 'Admin') {
+        res.status(422).json("Only Customers can add a review!");
     } else {
         reviewDB.postReview(uid, gid, content, rating, (err, result) => {
             if (err) {
@@ -285,8 +286,6 @@ router.post("/user/:uid/game/:gid/review/", verifyToken, (req, res) => {
                     res.status(422).json("GameId '" + gid + "' does not exist!");
                 } else if (result === -2) {
                     res.status(422).json("UserId '" + uid + "' does not exist!");
-                } else if (result === -3) {
-                    res.status(422).json("Only Customers can add a review!");
                 } else {
                     res.status(201).type('json').json({ "reviewid": result.insertId });
                 }
@@ -372,6 +371,8 @@ router.put("/game/:gameid/image", (req, res) => {
     var gid = req.params.gameid;
     var { url } = req.body;
 
+    const imagePath = path.join(__dirname, '/public/images');
+
     if (isNaN(gid)) {
         res.status(422).json("GameId '" + gid + "' is not a number!");
     } else {
@@ -427,6 +428,7 @@ router.get("/categories", (req, res) => {
         }
     });
 });
+
 //17 Get game by id
 router.get("/game/:gameid", (req, res) => {
     var gameid = req.params.gameid;
@@ -435,8 +437,11 @@ router.get("/game/:gameid", (req, res) => {
             console.log(err);
             res.status(500).json("Unknown error");
         } else {
-            console.log(result);
-            res.status(200).json(result);
+            if (result === -1) {
+                res.status(422).json();
+            } else {
+                res.status(200).json(result);
+            }
         }
     });
 });
