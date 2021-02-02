@@ -1,3 +1,9 @@
+/*
+  Name: Wu Zengfu
+  Admission Number: 2033457
+  Class: DIT/04
+*/
+
 /* Handle the visibility of login button , logout menu, Edit button based on usertype */
 $(document).ready(function () {
     let value = window.localStorage.getItem('userid');
@@ -37,6 +43,7 @@ $('#loginForm').submit((eve) => {
                 localStorage.setItem('token', res.data.token);
                 localStorage.setItem('userid', res.data.user_id);
                 localStorage.setItem('username', res.data.user_name);
+                localStorage.setItem('userType', res.data.user_type);
                 $('#loginName').text(res.data.user_name);
                 alert('Hello! ' + res.data.user_name);
                 $('#loginModal').modal('hide');
@@ -62,6 +69,7 @@ const logoutConfirm = function (source) {
     window.localStorage.removeItem('userid');
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('username');
+    window.localStorage.removeItem('userType');
     window.location.assign(redirectedLink);
     alert("You have logged out successfully!");
 }
