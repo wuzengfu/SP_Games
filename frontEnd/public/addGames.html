@@ -18,7 +18,7 @@
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
-<body style="background-image:url('./images/background_img.png');">
+<body style="background-image:url('./images/background_img.png'); overflow-y: scroll;">
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex justify-content-center">
 
@@ -100,13 +100,13 @@
             </div>
 
             <div class="mb-3">
-                <label for="category" class="form-label">Cateogry</label>
-                <select id="category" class="form-control" size="6" multiple>
+                <label for="category" class="form-label">Category</label>
+                <select id="category" class="form-control" size="6" multiple required>
                     <option value="null" disabled>Choose categories</option>
                 </select>
             </div>
 
-            <div class="mb-3 d-flex">
+            <div class="mb-3 d-flex" id="imageField">
                 <label for="image" class="form-label w-50">Add an image:</label>
                 <input type="file" id="image" class="form-control-file">
             </div>
@@ -217,7 +217,6 @@
         var year = $('#year').val();
         var categories = $('#category').val();
         var description = $('#description').val();
-
         var requestBody = {
             title: title,
             platform: platform,
@@ -225,27 +224,55 @@
             year: year,
             categories: categories.toString(),
             description: description,
-            type: window.localStorage.getItem('userType')
         };
 
-        axios.post(`${baseUrl}/game`, requestBody, {
-            headers: {
-                "Authorization": `Bearer ${window.localStorage.getItem('token')}`
-            }
-        }).then(res => {
-            alert("The game has been added successfully!");
-            $('#addGameForm').trigger('reset');
-            $('#title').removeClass('border-danger');
-        })
-            .catch(err => {
-                if (err.response.status === 422) {
-                    alert(err.response.data);
-                    $('#title').addClass('border-danger');
-                } else if (err.response.status === 401) {
-                    alert(err.response.data);
+
+        var fileInput = document.getElementById('image');
+
+        var file;
+        var data = new FormData();
+        data.append("details", JSON.stringify(requestBody));
+
+        const uploadGame = () => {
+            axios.post(`${baseUrl}/game`, data, {
+                headers: {
+                    "Authorization": `Bearer ${window.localStorage.getItem('token')}`
                 }
-                console.log(err);
-            });
+            }).then(res => {
+                alert("The game has been added successfully!");
+                $('#addGameForm').trigger('reset');
+                $('#title').removeClass('border-danger');
+            })
+                .catch(err => {
+                    if (err.response.status === 422) {
+                        alert(err.response.data);
+                        $('#title').addClass('border-danger');
+                    } else if (err.response.status === 401) {
+                        if (err.response.data == "") {
+                            alert("Unauthorized! Only Admins can add a game!");
+                        } else {
+                            alert(err.response.data);
+                        }
+                    } else if (err.response.status === 413) {
+                        alert(err.response.data);
+                    }
+                    console.log(err);
+                });
+        }
+
+        if (fileInput.files.length === 0) {
+            uploadGame();
+        } else {
+            file = fileInput.files[0];
+            if (file.type.match(/image.*/)) {
+                data.append('gamePic', file);
+                uploadGame();
+            } else {
+                alert("The file uploaded must be an image!");
+                $('#imageField').addClass("text-danger");
+                $('#image').addClass("text-danger");
+            }
+        }
     });
 </script>
 

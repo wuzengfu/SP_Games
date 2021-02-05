@@ -19,7 +19,7 @@
 
 </head>
 
-<body style="background-image:url('./images/background_img.png');">
+<body style="background-image:url('./images/background_img.png');overflow-y: scroll;">
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex justify-content-center">
 
@@ -84,7 +84,7 @@
             </div>
 
             <div class="w-25 mb-3">
-                <img src="*" class="img-fluid" id="image">
+                <img src="/" class="img-fluid" id="image">
             </div>
 
             <div class="mb-4">
@@ -244,6 +244,12 @@
                 }
 
                 if (categories == "") categories = "N/A";
+                var imageURL;
+                if (game.image == null || game.image == '') {
+                    imageURL = "./images/emptyGame.jpg";
+                } else {
+                    imageURL = baseUrl + "/" + game.image;
+                }
 
                 $("#title").text(game.title);
                 $("#platform").text(game.platform);
@@ -251,7 +257,8 @@
                 $("#year").text(game.year);
                 $("#description").text(game.description);
                 $("#category").text(categories);
-                $("#image").attr("src", `./images/${game.image}`);
+                $("#image").attr("src", imageURL);
+                console.log(imageURL);
             }).catch((err) => {
                 if (err.response.status === 422) {
                     alert("Something wrong here!");
@@ -299,17 +306,14 @@
         // prevents the page from refreshing
         event.preventDefault();
 
-        const uid = window.localStorage.getItem('userid');
         const gid = window.localStorage.getItem('gameid');
-        const type = window.localStorage.getItem('userType');
         const requestBody = {
             content: $("#comment").val(),
             rating: $('#rating').val(),
-            type: type
         };
         const header = `Bearer ${window.localStorage.getItem('token')}`;
 
-        axios.post(`${baseUrl}/user/${uid}/game/${gid}/review/`, requestBody, {
+        axios.post(`${baseUrl}/user/game/${gid}/review/`, requestBody, {
             headers: {
                 Authorization: header
             }
@@ -322,6 +326,7 @@
             } else if (err.response.status === 401) {
                 alert('Only registered members can add a review!');
                 $('#loginModal').modal('show');
+                $('body').css("padding-right", "0");
             }
         });
 

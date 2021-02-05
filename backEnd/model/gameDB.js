@@ -4,7 +4,6 @@
   Class: DIT/04
 */
 var db = require('./databaseConfig.js');
-var fs = require('fs');
 
 var gameDB = {
     filterGames: function (title, price, platform, titleVerify, priceVerify, platformVerify, callback) {
@@ -26,12 +25,12 @@ var gameDB = {
                     title, titleVerify,
                     price, priceVerify,
                     platform, platformVerify
-                ], (err, result) => {
+                ], (err, results) => {
                     conn.end();
                     if (err) {
                         return callback(err, null);
                     } else {
-                        return callback(null, result);
+                        return callback(null, results);
                     }
                 });
             }
@@ -47,8 +46,20 @@ var gameDB = {
      * (2) Category ID is not a number
      * 
      */
-    postGame: function (title, description, price, platform, categoryid, year, callback) {
+    postGame: function (title, description, price, platform, categoryid, year, check, callback) {
         var conn = db.getConnection();
+
+        var picName = null;
+        if (!check) {
+            return callback(null, -10)
+        } else if (check == "No file") {
+
+        } else {
+            picName = title.replace(" ", "_");
+            picName = picName.replace(":", "_");
+            picName = picName.replace("'", "_");
+            picName += ".jpg";
+        }
 
         conn.connect(err => {
             if (err) {
@@ -65,8 +76,8 @@ var gameDB = {
                             return callback(null, -1);
                         } else {
                             //new game
-                            sql = "INSERT INTO game (title, description, price, platform, year) VALUES (?,?,?,?,?);";
-                            conn.query(sql, [title, description, price, platform, year], (err, result) => {
+                            sql = "INSERT INTO game (title, description, price, platform, year,image) VALUES (?,?,?,?,?,?);";
+                            conn.query(sql, [title, description, price, platform, year, picName], (err, result) => {
                                 if (err) {
                                     return callback("Unknown error", null);
                                 } else {

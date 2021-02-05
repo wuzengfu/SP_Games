@@ -27,7 +27,8 @@
 
 </head>
 
-<body style="background-image:url('./images/background_img.png');">
+<body style="background-image:url('./images/background_img.png'); overflow-y: scroll;"
+    onhashchange="function s (){alert('jhjs')}">
     <!-- Navigation bar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark d-flex justify-content-center">
 
@@ -83,8 +84,8 @@
     </nav><!-- nav-bar -->
 
     <!-- Main Body -->
-    <div class="container mt-3 d-flex justify-content-center" style="width: 83%;">
-        <div>
+    <div class="container mt-3 d-flex justify-content-center">
+        <div class="w-100">
             <!-- Search function -->
             <div class="form-group row justify-content-between">
 
@@ -99,9 +100,9 @@
                     </div>
                 </div>
 
-                <div class="col-1"></div>
+                <!-- <div class="col-1"></div> -->
                 <!-- Max Price -->
-                <div class="col-5 form-group row">
+                <div class="col-5 form-group row d-flex justify-content-end">
                     <label for="maxPrice" class="col-form-label">Max Price:</label>
                     <div class="col-5">
                         <input type="num" id="maxPrice" class="form-control">
@@ -110,7 +111,7 @@
                         <button type="submit" id="search_game" class="btn btn-success">Search</button>
                     </div>
                 </div>
-                <div class="col-1"></div>
+                <div class="col-2"></div>
             </div>
 
             <!-- Search by Platform -->
@@ -119,7 +120,7 @@
                 <div class="form-group col-10">
                     <label for="searchByPlatform">Search by platform:</label>
                     <select class="form-control" id="searchByPlatform">
-                        <option value="all">All-</option>
+                        <option value="">All-</option>
                     </select>
                 </div>
             </div>
@@ -214,7 +215,6 @@
         var price = $('#maxPrice').val();
         var title = $('#search').val();
         var platform = $("#searchByPlatform option:selected").val();
-        if (platform == 'all') platform = "";
 
         var requestBody = JSON.stringify({ price: price, title: title, platform: platform });
 
@@ -223,10 +223,16 @@
             var result = "";
 
             games.forEach(ele => {
-                if (ele.image == null || ele.image == '') ele.image = "emptyGame.jpg";
+                var imageURL;
+                if (ele.image == null || ele.image == '') {
+                    imageURL = "./images/emptyGame.jpg";
+                } else {
+                    imageURL = baseUrl + "/" + ele.image;
+                }
+
                 result += `
                             <div class="card col-3 text-center mb-3 pr-0 pl-0" style="margin-left: 5%;">
-                    <img src='./images/${ele.image}' class="card-img-top">
+                    <img src='${imageURL}' class="card-img-top">
                     <div class="card-body">
                         <h5 class="card-title">${ele.title}</h5>
                         <p class="card-text text-danger">$${ele.price}</p>
@@ -270,6 +276,9 @@
 
     /* When maxPrice changed */
     $("#maxPrice").change(function () { filterGames() });
+
+    /* When search button is pressed */
+    $("#search_game").click(function () { filterGames() });
 </script>
 
 <!-- Go to Details page -->

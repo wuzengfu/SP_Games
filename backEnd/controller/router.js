@@ -13,8 +13,12 @@ var reviewDB = require('../model/reviewDB');
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = require("../config.js");
 const verifyToken = require("../auth/verifyToken");
-var cors = require('cors');
 
+const fileUpload = require('express-fileupload');
+const fileType = require('file-type');
+router.use(fileUpload({ createParentPath: true }));
+
+var cors = require('cors');
 router.options('*', cors());
 router.use(cors());
 
@@ -22,7 +26,6 @@ var bodyParser = require('body-parser');
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-var path = require('path');
 
 //Filter Games
 router.get("/games/filter/:data", (req, res) => {
@@ -133,10 +136,10 @@ router.get("/users/:id/", (req, res) => {
 
 //4
 router.post("/category", verifyToken, (req, res) => {
-    var { catname, description, type } = req.body;
+    var { catname, description } = req.body;
 
-    if (type !== "Admin") {
-        res.status(401).json("Only Admins can add a game!");
+    if (req.decodedToken.user_type !== "Admin") {
+        res.status(401).json("Only Admins can add a category!");
     } else {
         catDB.postCategory(catname, description, (err, result) => {
             if (err) {
@@ -179,20 +182,57 @@ router.put("/category/:id/", (req, res) => {
 });
 
 //6
-router.post("/game", verifyToken, (req, res) => {
-    var { title, description, price, platform, categories, year, type } = req.body;
+router.post("/game", verifyToken, async (req, res) => {
+    var { title, description, price, platform, categories, year } = JSON.parse(req.body.details);
 
-    if (type !== "Admin") {
+    if (req.decodedToken.user_type !== "Admin") {
         res.status(401).json("Only Admins can add a game!");
     } else {
-        gameDB.postGame(title, description, price, platform, categories, year, (err, result) => {
+        var check = false;
+        var msg;
+        var gamePic;
+
+        if (req.files) {
+            gamePic = req.files.gamePic;
+            let type;
+            try {
+                if ((type = await fileType.fromBuffer(gamePic.data)).ext !== "jpg") {
+                    msg = "Your image uploaded is not in jpg format!";
+                    console.log(type);
+                } else if ((gamePic.size > 1 * 1024 * 1024)) {
+                    msg = "Your image size must be less than 1MB!";
+                } else {
+                    check = true;
+                    console.log(`File ${gamePic.name} size ${gamePic.size} is uploaded`);
+                }
+            } catch (e) {
+                console.log(e);
+            }
+        } else {
+            check = "No file";
+        }
+
+        gameDB.postGame(title, description, price, platform, categories, year, check, (err, result) => {
             if (err) {
                 console.log(err);
                 res.status(500).json(err);
             } else {
-                if (result === -1) {
+                if (result == -10) {
+                    console.log("File Not in JPG or File Too Big!");
+                    res.status(413).json(msg);
+                } else if (result === -1) {
                     res.status(422).json("The game title " + title + " has already existed!");
                 } else {
+                    try {
+                        if (check) {
+                            let temp = title.replace(" ", "_");
+                            temp = temp.replace(":", "_");
+                            temp = temp.replace("'", "_");
+                            gamePic.mv('./public/' + temp + ".jpg");
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }
                     res.status(201).json({ "gameid": result });
                     console.log(result);
                 }
@@ -266,15 +306,13 @@ router.put("/game/:id", (req, res) => {
 });
 
 //10
-router.post("/user/:uid/game/:gid/review/", verifyToken, (req, res) => {
-    var uid = req.params.uid * 1;
-    var gid = req.params.gid * 1;
+router.post("/user/game/:gid/review/", verifyToken, (req, res) => {
+    var uid = req.decodedToken.user_id;;
+    var gid = req.params.gid;
 
-    var { content, rating, type } = req.body;
+    var { content, rating } = req.body;
 
-    if (isNaN(uid) || isNaN(gid)) {
-        res.status(422).json("userId or gameId is not a number!");
-    } else if (type == 'Admin') {
+    if (req.decodedToken.user_type !== "Customer") {
         res.status(422).json("Only Customers can add a review!");
     } else {
         reviewDB.postReview(uid, gid, content, rating, (err, result) => {
@@ -371,8 +409,6 @@ router.put("/game/:gameid/image", (req, res) => {
     var gid = req.params.gameid;
     var { url } = req.body;
 
-    const imagePath = path.join(__dirname, '/public/images');
-
     if (isNaN(gid)) {
         res.status(422).json("GameId '" + gid + "' is not a number!");
     } else {
@@ -444,6 +480,11 @@ router.get("/game/:gameid", (req, res) => {
             }
         }
     });
+});
+
+router.get("/user/type", verifyToken, (req, res) => {
+    var user_type = req.decodedToken.user_type;
+    res.status(200).send(user_type);
 });
 
 

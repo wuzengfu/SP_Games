@@ -6,17 +6,20 @@
 
 /* Handle the visibility of login button , logout menu, Edit button based on usertype */
 $(document).ready(function () {
-    let value = window.localStorage.getItem('userid');
+    let value = window.localStorage.getItem('token');
     $('#loginFailed').hide();
 
-    axios.get(`${baseUrl}/users/${value}/`).then(res => {
-        if (res.data.type !== "Admin") {
+    axios.get(`${baseUrl}/user/type`, {
+        headers:
+        {
+            authorization: "Bearer " + value
+        }
+    }).then(res => {
+        if (res.data !== "Admin") {
             $('#editGames').hide();
         }
     }).catch(err => {
-        if (err.response.status === 422) {
-            $('#editGames').hide();
-        }
+        $('#editGames').hide();
     })
 
     if (value != null || value != undefined) {
@@ -39,21 +42,16 @@ $('#loginForm').submit((eve) => {
     };
     axios.post(`${baseUrl}/login/`, requestBody).
         then((res) => {
-            if (res != null) {
-                localStorage.setItem('token', res.data.token);
-                localStorage.setItem('userid', res.data.user_id);
-                localStorage.setItem('username', res.data.user_name);
-                localStorage.setItem('userType', res.data.user_type);
-                $('#loginName').text(res.data.user_name);
-                alert('Hello! ' + res.data.user_name);
-                $('#loginModal').modal('hide');
-                window.location.reload();
-            } else {
-                alert("Please enter the correct password or email!");
-                console.log("Error");
-            }
+            localStorage.setItem('token', res.data.token);
+            localStorage.setItem('username', res.data.user_name);
+            $('#loginName').text(res.data.user_name);
+            alert('Hello! ' + res.data.user_name);
+            $('#loginModal').modal('hide');
+            window.location.reload();
         }).catch((err) => {
             $('#loginFailed').show();
+            $('#email').addClass("border-danger")
+            $('#password').addClass("border-danger")
             alert("Please enter the correct password or email!");
             console.log(err);
         });
@@ -62,14 +60,14 @@ $('#loginForm').submit((eve) => {
 /* Logout */
 $("#logout").click(() => {
     $('#logoutModal').modal('show');
+    $('body').css("padding-right", "0");
     $('#logoutHeader').text('Hi, ' + $('#loginName').text());
 });
+
 const logoutConfirm = function (source) {
     var redirectedLink = source == 'details' ? './details.html' : './index.html';
-    window.localStorage.removeItem('userid');
     window.localStorage.removeItem('token');
     window.localStorage.removeItem('username');
-    window.localStorage.removeItem('userType');
     window.location.assign(redirectedLink);
     alert("You have logged out successfully!");
 }
@@ -77,4 +75,5 @@ const logoutConfirm = function (source) {
 /* Show Login Modal when login is pressed */
 $('#loginBar').click(() => {
     $('#loginModal').modal('show');
+    $('body').css("padding-right", "0");
 })
