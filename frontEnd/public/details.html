@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!-- 
+  Name: Wu Zengfu
+  Admission Number: 2033457
+  Class: DIT/04
+ -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +40,7 @@
                 <li class="nav-item dropdown" id="editGames">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="false">
-                        EDIT
+                        ADD
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="./addGames.html">
@@ -268,19 +274,24 @@
             });
 
         /* Get game reviews */
+        var resultOfReviews;
+        var comments = "";
+
         axios.get(`${baseUrl}/game/${gameid}/review`)
             .then((res) => {
                 var reviews = res.data;
                 var totalRating = 0;
 
-                var comments = "";
+
                 reviews.forEach(ele => {
+                    ele.created_at = ele.created_at.replace("T", " ");
+                    ele.created_at = ele.created_at.replace(".000Z", " ");
                     comments += ` 
                             <li class="media mb - 3">
                                 <img src = "./images/user.jpg" class="mr-3 img-fluid" style = "width: 7%;">
                                     <div class="media-body">
                                         <h5 class="mt-0 mb-1">${ele.username}</h5>
-                                        <p class="font-italic mb-1 text-danger">Posted on: ${ele.created_at} , Rating Given: ${ele.rating} </p>
+                                        <p class="font-italic mb-1 text-danger">Posted on: ${ele.created_at} , Rating Given: ${ele.rating} / 5</p>
                                         <p>
                                             ${ele.content}
                                        </p>
@@ -289,12 +300,16 @@
                     totalRating += ele.rating * 1;
                 });
 
-                $("#comments").html(comments);
-                $("#averageRating").html(`Average rating of
-                    ${(totalRating / reviews.length).toFixed(2)} from ${reviews.length} comments(s)`);
+                resultOfReviews = `Average rating of
+                    ${totalRating / reviews.length} / 5 from ${reviews.length} comments(s)`;
 
-            }).catch((err) => {
-                console.log(err);
+            }).catch(err => {
+                if (err.response.status === 422) {
+                    resultOfReviews = "Average rating of N/A from 0 comments(s)";
+                }
+            }).finally(() => {
+                $("#comments").html(comments);
+                $("#averageRating").html(resultOfReviews);
             });
     }
     getGameDetails();
@@ -330,7 +345,7 @@
             }
         });
 
-        setTimeout(function () { $("#create-post-form").trigger('reset'); }, 1200);
+        $("#create-post-form").trigger('reset');
     });
 </script>
 

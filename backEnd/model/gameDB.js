@@ -18,7 +18,7 @@ var gameDB = {
                 var sql =
                     `SELECT * FROM game WHERE
                 (title LIKE ? OR ?) AND
-                (price < ? OR ?) AND
+                (price <= ? OR ?) AND
                 (platform = ? OR ?);`;
 
                 conn.query(sql, [

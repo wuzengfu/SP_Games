@@ -307,7 +307,7 @@ router.put("/game/:id", (req, res) => {
 
 //10
 router.post("/user/game/:gid/review/", verifyToken, (req, res) => {
-    var uid = req.decodedToken.user_id;;
+    var uid = req.decodedToken.user_id;
     var gid = req.params.gid;
 
     var { content, rating } = req.body;
