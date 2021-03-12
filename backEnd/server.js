@@ -4,7 +4,7 @@
   Class: DIT/04
 */
 const router = require('./controller/router.js');
-const hostname = 'localhost';
+const hostname = '0.0.0.0';
 const port = 3001;
 
 var express = require('express');
