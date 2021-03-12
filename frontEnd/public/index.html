@@ -196,7 +196,7 @@
 
 <!-- BaseUrl -->
 <script>
-    const baseUrl = "http://54.146.249.225:3001";
+    const baseUrl = "http://localhost:3001";
 </script>
 
 <!-- Login and Logout javascript -->
@@ -227,7 +227,7 @@
                 if (ele.image == null || ele.image == '') {
                     imageURL = "./images/emptyGame.jpg";
                 } else {
-                    imageURL = baseUrl + "/" + ele.image;
+                    imageURL = "./images/" + ele.image;
                 }
 
                 result += `
