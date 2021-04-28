@@ -1,11 +1,14 @@
-/* 
+/*
   Name: Wu Zengfu
   Admission Number: 2033457
   Class: DIT/04
 */
 const router = require('./controller/router.js');
-const hostname = '0.0.0.0';
-const port = 3001;
+
+require('dotenv').config();
+
+const hostname = process.env.HOST;
+const port = process.env.PORT;
 
 var express = require('express');
 router.use(express.static(__dirname + "/public"));
