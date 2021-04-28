@@ -118,7 +118,7 @@
 
             <form action="" id="create-post-form">
                 <div class="form-group">
-                    <label for="selectRating" class="font-weight-bold">Rating:</label>
+                    <label for="rating" class="font-weight-bold">Rating:</label>
                     <select class="form-control" id="rating">
                         <option value="0">0</option>
                         <option value="1">1</option>
@@ -129,7 +129,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="commentField" class="font-weight-bold">Comment:</label>
+                    <label for="comment" class="font-weight-bold">Comment:</label>
                     <textarea class="form-control mb-2" id="comment" rows="5" required></textarea>
                 </div>
                 <button type="submit" class="btn btn-success mr-2" id="submit">Submit</button>
@@ -159,7 +159,7 @@
                         <div class="text-left">
                             <h4>Please Login in</h4>
                             <p class="text-danger" id="loginFailed">Please enter a correct password or email!</p>
-                            <label for="inputName">Email</label>
+                            <label for="email">Email</label>
                             <div class="input-group mb-2">
                                 <div class="input-group-prepend">
                                     <div class="input-group-text"><img src="./images/user.png" width="15"></div>
@@ -209,7 +209,7 @@
 
 <!-- BaseUrl -->
 <script>
-    const baseUrl = "http://192.168.1.71:3001";
+    const baseUrl = "http://localhost:3001";
 </script>
 
 <!-- Login and Logout javascript -->
@@ -237,18 +237,18 @@
 
                 for (let i = 0; i < res.data.categories.length; i++) {
                     let comma = " , ";
-                    if (res.data.categories.length - 1 == i) {
+                    if (res.data.categories.length - 1 === i) {
                         comma = "";
                     }
                     categories += res.data.categories[i].catname + comma;
                 }
 
-                if (categories == "") categories = "N/A";
+                if (categories === "") categories = "N/A";
                 var imageURL;
-                if (game.image == null || game.image == '') {
+                if (game.image == null || game.image === '') {
                     imageURL = "./images/emptyGame.jpg";
                 } else {
-                    imageURL = "./images/" + game.image;
+                    imageURL = "/images/" + game.image;
                 }
 
                 $("#title").text(game.title);
@@ -262,7 +262,7 @@
             }).catch((err) => {
                 if (err.response.status === 422) {
                     alert("Something wrong here!");
-                    window.location.assign('./index.html');
+                    window.location.assign('/');
                 }
                 console.log(err);
             });
